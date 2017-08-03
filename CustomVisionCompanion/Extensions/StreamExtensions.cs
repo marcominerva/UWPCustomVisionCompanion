@@ -30,18 +30,7 @@ namespace CustomVisionCompanion.Extensions
             return bitmapSource;
         }
 
-        public static async Task<byte[]> ToArrayAsync(this Stream stream)
-        {
-            stream.Position = 0;
-
-            using (var ms = new MemoryStream())
-            {
-                await stream.CopyToAsync(ms);
-                return ms.ToArray();
-            }
-        }
-
-        public static string ToFileSize(this int value)
+        public static string ToFileSize(this long value)
         {
             string[] suffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
             for (var i = 0; i < suffixes.Length; i++)

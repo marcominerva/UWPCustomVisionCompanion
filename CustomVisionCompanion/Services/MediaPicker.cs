@@ -70,13 +70,6 @@ namespace CustomVisionCompanion.Services
             return null;
         }
 
-        /// <summary>
-        /// Resizes and crops source file image so that resized image width/height are not larger than <param name="requestedMinSize"></param>
-        /// </summary>
-        /// <param name="sourceFile">Source StorageFile</param>
-        /// <param name="requestedMinSize">Width/Height of the output image</param>
-        /// <param name="resizedImageFile">Target StorageFile</param>
-        /// <returns></returns>
         private static async Task<Stream> ResizeImageAsync(StorageFile sourceFile, int width, int height)
         {
             using (var imageStream = await sourceFile.OpenReadAsync())

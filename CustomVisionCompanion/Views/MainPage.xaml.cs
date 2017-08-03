@@ -31,17 +31,17 @@ namespace CustomVisionCompanion.Views
         public MainPage()
         {
             this.InitializeComponent();
-        }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
             var qualities = Enum.GetValues(typeof(CameraCaptureUIMaxPhotoResolution)).Cast<CameraCaptureUIMaxPhotoResolution>()
                 .Where(q => q == CameraCaptureUIMaxPhotoResolution.Large3M || q == CameraCaptureUIMaxPhotoResolution.MediumXga)
                 .ToList();
 
             ImageQuality.ItemsSource = qualities;
             ImageQuality.SelectedItem = qualities.FirstOrDefault(q => q == CameraCaptureUIMaxPhotoResolution.MediumXga);
+        }
 
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
             InitializeEndpoint();
             await LoadProjectsAsync();
 
@@ -66,6 +66,7 @@ namespace CustomVisionCompanion.Views
 
                 ProgressBar.Visibility = Visibility.Visible;
 
+                // Get the list of all Custom Vision projects.
                 var projects = await trainingApi.GetProjectsAsync();
                 ProjectList.ItemsSource = projects.ToDictionary(k => k.Id, v => v.Name);
                 ProjectList.SelectedIndex = 0;
@@ -113,14 +114,13 @@ namespace CustomVisionCompanion.Views
 
                     var bitmap = await photo.AsSoftwareBitmapAsync();
                     PreviewImage.Source = await bitmap.AsImageSourceAsync();
-                    var imageBuffer = await photo.ToArrayAsync();
-                    ImageSize.Text = $"{bitmap.PixelWidth}x{bitmap.PixelHeight} ({imageBuffer.Length.ToFileSize()})";
+                    ImageSize.Text = $"{bitmap.PixelWidth}x{bitmap.PixelHeight} ({photo.Length.ToFileSize()})";
 
-                    using (var ms = new MemoryStream(imageBuffer))
-                    {
-                        var result = await predictionEndpoint.PredictImageAsync((Guid)ProjectList.SelectedValue, ms);
-                        VisionResults.ItemsSource = result.Predictions.Select(p => $"{p.Tag}: {p.Probability:P1}");
-                    }
+                    // Call the prediction endpoint of Custom Vision.
+                    var result = await predictionEndpoint.PredictImageAsync((Guid)ProjectList.SelectedValue, photo);
+                    VisionResults.ItemsSource = result.Predictions.Select(p => $"{p.Tag}: {p.Probability:P1}");
+
+                    photo.Dispose();
                 }
             }
             catch (HttpOperationException ex) when (ex.Response.StatusCode == HttpStatusCode.NotFound)
@@ -149,6 +149,6 @@ namespace CustomVisionCompanion.Views
 
         private void Settings_Click(object sender, RoutedEventArgs e) => GotoSettingsPage();
 
-        private void GotoSettingsPage()=> Frame.Navigate(typeof(SettingsPage));
+        private void GotoSettingsPage() => Frame.Navigate(typeof(SettingsPage));
     }
 }
