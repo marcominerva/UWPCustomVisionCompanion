@@ -123,6 +123,11 @@ namespace CustomVisionCompanion.Views
                     }
                 }
             }
+            catch (HttpOperationException ex) when (ex.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                var message = "You need to set a default iteration in the 'Performance' tab of the Custom Vision Portal.";
+                await DialogService.ShowAsync(message);
+            }
             catch (Exception ex)
             {
                 await DialogService.ShowAsync(ex.Message);

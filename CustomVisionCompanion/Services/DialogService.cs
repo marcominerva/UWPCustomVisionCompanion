@@ -11,7 +11,7 @@ namespace CustomVisionCompanion.Services
     {
         public static Task ShowAsync(string message, string title = null)
         {
-            var dialog = new MessageDialog(message, title);
+            var dialog = new MessageDialog(message, title ?? string.Empty);
             return dialog.ShowAsync().AsTask();
         }
     }
