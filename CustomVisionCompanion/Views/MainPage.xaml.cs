@@ -42,13 +42,13 @@ namespace CustomVisionCompanion.Views
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            InitializeEndpoint();
+            InitializeEndpoints();
             await LoadProjectsAsync();
 
             base.OnNavigatedTo(e);
         }
 
-        private void InitializeEndpoint()
+        private void InitializeEndpoints()
         {
             var trainingCredentials = new TrainingApiCredentials(Settings.TrainingKey);
             var predictionCredentials = new PredictionEndpointCredentials(Settings.PredictionKey);

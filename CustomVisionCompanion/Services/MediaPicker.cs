@@ -33,7 +33,7 @@ namespace CustomVisionCompanion.Services
 
         public static async Task<Stream> PickPhotoAsync(CameraCaptureUIMaxPhotoResolution resolution)
         {
-            var picker = new FileOpenPicker()
+            var picker = new FileOpenPicker
             {
                 ViewMode = PickerViewMode.Thumbnail,
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary
@@ -63,7 +63,6 @@ namespace CustomVisionCompanion.Services
                         break;
                 }
 
-                // Application now has read/write access to the picked file
                 return await ResizeImageAsync(file, width, height);
             }
 
