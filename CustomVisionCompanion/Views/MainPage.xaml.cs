@@ -37,7 +37,7 @@ namespace CustomVisionCompanion.Views
                 .ToList();
 
             ImageQuality.ItemsSource = qualities;
-            ImageQuality.SelectedItem = qualities.FirstOrDefault(q => q == CameraCaptureUIMaxPhotoResolution.MediumXga);
+            ImageQuality.SelectedItem = qualities.FirstOrDefault(q => q == CameraCaptureUIMaxPhotoResolution.Large3M);
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -68,6 +68,7 @@ namespace CustomVisionCompanion.Views
 
                 // Get the list of all Custom Vision projects.
                 var projects = await trainingApi.GetProjectsAsync();
+                var t = trainingApi.GetIterationsAsync(Guid.NewGuid());
                 ProjectList.ItemsSource = projects.ToDictionary(k => k.Id, v => v.Name);
                 ProjectList.SelectedIndex = 0;
 
