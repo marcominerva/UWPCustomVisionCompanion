@@ -91,13 +91,15 @@ namespace CustomVisionCompanion.Views
 
         private async void TakePhoto_Click(object sender, RoutedEventArgs e)
         {
-            var photo = await MediaPicker.TakePhotoAsync((CameraCaptureUIMaxPhotoResolution)Enum.Parse(typeof(CameraCaptureUIMaxPhotoResolution), ImageQuality.SelectedItem.ToString()));
+            Enum.TryParse<CameraCaptureUIMaxPhotoResolution>(ImageQuality.SelectedItem.ToString(), out var resolution);
+            var photo = await MediaPicker.TakePhotoAsync(resolution);
             await PredictAsync(photo);
         }
 
         private async void PickPhoto_Click(object sender, RoutedEventArgs e)
         {
-            var photo = await MediaPicker.PickPhotoAsync((CameraCaptureUIMaxPhotoResolution)Enum.Parse(typeof(CameraCaptureUIMaxPhotoResolution), ImageQuality.SelectedItem.ToString()));
+            Enum.TryParse<CameraCaptureUIMaxPhotoResolution>(ImageQuality.SelectedItem.ToString(), out var resolution);
+            var photo = await MediaPicker.PickPhotoAsync(resolution);
             await PredictAsync(photo);
         }
 
