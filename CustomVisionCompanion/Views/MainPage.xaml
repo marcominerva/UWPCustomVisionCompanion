@@ -63,10 +63,6 @@
                     MaxWidth="400"
                     Margin="0,0,0,5"
                     Stretch="UniformToFill" />
-                <TextBlock
-                    x:Name="ImageSize"
-                    Margin="10,0,0,0"
-                    TextWrapping="Wrap" />
             </StackPanel>
             <ListView
                 x:Name="VisionResults"

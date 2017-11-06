@@ -14,19 +14,19 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.Media.Capture;
 using Windows.UI.Popups;
-using Microsoft.Cognitive.CustomVision;
 using System.Threading.Tasks;
 using CustomVisionCompanion.Services;
 using CustomVisionCompanion.Extensions;
-using Microsoft.Rest;
 using System.Net;
+using CustomVisionCompanion.Engine;
+using System.Net.Http;
+using CustomVisionCompanion.Engine.Extensions;
 
 namespace CustomVisionCompanion.Views
 {
     public sealed partial class MainPage : Page
     {
-        private TrainingApi trainingApi;
-        private PredictionEndpoint predictionEndpoint;
+        private CustomVisionClient customVisionClient;
 
         public MainPage()
         {
@@ -50,11 +50,7 @@ namespace CustomVisionCompanion.Views
 
         private void InitializeEndpoints()
         {
-            var trainingCredentials = new TrainingApiCredentials(Settings.TrainingKey);
-            var predictionCredentials = new PredictionEndpointCredentials(Settings.PredictionKey);
-
-            trainingApi = new TrainingApi(trainingCredentials);
-            predictionEndpoint = new PredictionEndpoint(predictionCredentials);
+            customVisionClient = new CustomVisionClient(Settings.PredictionKey, Settings.TrainingKey);
         }
 
         private async Task LoadProjectsAsync()
@@ -67,8 +63,7 @@ namespace CustomVisionCompanion.Views
                 ProgressBar.Visibility = Visibility.Visible;
 
                 // Get the list of all Custom Vision projects.
-                var projects = await trainingApi.GetProjectsAsync();
-                var t = trainingApi.GetIterationsAsync(Guid.NewGuid());
+                var projects = await customVisionClient.GetProjectsAsync();
                 ProjectList.ItemsSource = projects.ToDictionary(k => k.Id, v => v.Name);
                 ProjectList.SelectedIndex = 0;
 
@@ -93,17 +88,17 @@ namespace CustomVisionCompanion.Views
         {
             Enum.TryParse<CameraCaptureUIMaxPhotoResolution>(ImageQuality.SelectedItem.ToString(), out var resolution);
             var photo = await MediaPicker.TakePhotoAsync(resolution);
-            await PredictAsync(photo);
+            await PredictAsync(photo, resolution);
         }
 
         private async void PickPhoto_Click(object sender, RoutedEventArgs e)
         {
             Enum.TryParse<CameraCaptureUIMaxPhotoResolution>(ImageQuality.SelectedItem.ToString(), out var resolution);
-            var photo = await MediaPicker.PickPhotoAsync(resolution);
-            await PredictAsync(photo);
+            var photo = await MediaPicker.PickPhotoAsync();
+            await PredictAsync(photo, resolution);
         }
 
-        private async Task PredictAsync(Stream photo)
+        private async Task PredictAsync(Stream photo, CameraCaptureUIMaxPhotoResolution resolution)
         {
             try
             {
@@ -115,12 +110,11 @@ namespace CustomVisionCompanion.Views
 
                     CleanUp();
 
-                    var bitmap = await photo.AsSoftwareBitmapAsync();
-                    PreviewImage.Source = await bitmap.AsImageSourceAsync();
-                    ImageSize.Text = $"{bitmap.PixelWidth}x{bitmap.PixelHeight} ({photo.Length.ToFileSize()})";
+                    PreviewImage.Source = await photo.AsImageSourceAsync();
 
                     // Call the prediction endpoint of Custom Vision.
-                    var result = await predictionEndpoint.PredictImageAsync((Guid)ProjectList.SelectedValue, photo);
+                    var size = GetResolution(resolution);
+                    var result = await customVisionClient.PredictImageAsync((Guid)ProjectList.SelectedValue, photo, size.Width, size.Height);
                     VisionResults.ItemsSource = result.Predictions.Select(p => $"{p.Tag}: {p.Probability:P1}");
 
                     photo.Dispose();
@@ -147,11 +141,31 @@ namespace CustomVisionCompanion.Views
         {
             PreviewImage.Source = null;
             VisionResults.ItemsSource = null;
-            ImageSize.Text = string.Empty;
         }
 
         private void Settings_Click(object sender, RoutedEventArgs e) => GotoSettingsPage();
 
         private void GotoSettingsPage() => Frame.Navigate(typeof(SettingsPage));
+
+        private (int Width, int Height) GetResolution(CameraCaptureUIMaxPhotoResolution resolution)
+        {
+            int width, height;
+
+            switch (resolution)
+            {
+                case CameraCaptureUIMaxPhotoResolution.MediumXga:
+                    width = 640;
+                    height = 480;
+                    break;
+
+                case CameraCaptureUIMaxPhotoResolution.Large3M:
+                default:
+                    width = 1920;
+                    height = 1080;
+                    break;
+            }
+
+            return (width, height);
+        }
     }
 }

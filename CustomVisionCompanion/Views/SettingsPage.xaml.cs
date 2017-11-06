@@ -14,7 +14,6 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.Media.Capture;
 using Windows.UI.Popups;
-using Microsoft.Cognitive.CustomVision;
 using System.Threading.Tasks;
 using Windows.System;
 using CustomVisionCompanion.Services;
