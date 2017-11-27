@@ -18,9 +18,9 @@ using System.Threading.Tasks;
 using CustomVisionCompanion.Services;
 using CustomVisionCompanion.Extensions;
 using System.Net;
-using CustomVisionCompanion.Engine;
 using System.Net.Http;
-using CustomVisionCompanion.Engine.Extensions;
+using CustomVisionServiceLibrary;
+using CustomVisionServiceLibrary.Extensions;
 
 namespace CustomVisionCompanion.Views
 {
